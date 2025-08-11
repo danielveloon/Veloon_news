@@ -1,0 +1,8 @@
+# Dependências
+node_modules
+
+# Arquivos de credenciais locais
+*.json
+
+# Logs
+*.log
