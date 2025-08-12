@@ -1,21 +1,11 @@
 const { google } = require('googleapis');
 
 const SPREADSHEET_ID = '1-u-WSLEpz7_537FytU_gK3bm3sKm-8Rkw2Fn3MFvRJ4';
+const CREDENTIALS_PATH = 'C:/Users/Think/Downloads/teste-sheets-454212-3bdc66ff6259.json';
 
-// Função de autenticação modificada
 async function autenticar() {
-  // 1. Pega o conteúdo do JSON da variável de ambiente
-  const credentialsJson = process.env.GOOGLE_CREDENTIALS;
-  if (!credentialsJson) {
-    throw new Error('A variável de ambiente GOOGLE_CREDENTIALS não está definida.');
-  }
-
-  // 2. Faz o parse do JSON
-  const credentials = JSON.parse(credentialsJson);
-
-  // 3. Usa as credenciais diretamente
   const auth = new google.auth.GoogleAuth({
-    credentials, // Usa o objeto de credenciais
+    keyFile: CREDENTIALS_PATH,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   return await auth.getClient();

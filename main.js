@@ -6,8 +6,7 @@ const {
   coletarNoticiasTheNews,
   coletarNoticiasValor,
   pegarConteudoNoticiaValor
-} = require('./scraper');
-// ajuste se necessário
+} = require('./scraper'); // ajuste se necessário
 const { adicionarNoticias } = require('./sheets');
 
 // --- Função para coletar e processar notícias do Estadão ---
@@ -130,20 +129,15 @@ async function processarValor(browser) {
 }
 
 // --- Função principal ---
-// ... dentro do arquivo main.js
-
 async function main() {
-  console.log('🚀 Iniciando o navegador Puppeteer...');
-  // Adiciona os argumentos '--no-sandbox' e '--disable-setuid-sandbox'
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  });
-
+  const browser = await puppeteer.launch({ headless: true });
   try {
+    await processarEstadao(browser);
+    console.log('\n--- Coleta do Estadão finalizada ---');
+
+    await processarTheNews(browser);
+    console.log('\n--- Coleta do TheNews finalizada ---');
+
     await processarValor(browser);
     console.log('\n--- Coleta do Valor Econômico finalizada ---');
   } catch (error) {
@@ -154,4 +148,5 @@ async function main() {
   }
 }
 
+// Executa a função principal
 main();
