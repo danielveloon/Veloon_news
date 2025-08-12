@@ -1,4 +1,5 @@
 // main.js unificado
+require('dotenv').config();
 const puppeteer = require('puppeteer');
 const {
   coletarNoticiasEstadao,
