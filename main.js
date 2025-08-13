@@ -20,12 +20,12 @@ async function processarEstadao(browser) {
 
     for (const noticia of noticiasEstadao) {
       if (noticia.titulo.includes('Som a Pino') || noticia.titulo.includes('Start Eldorado')) {
-        console.log(`\n⏭️ Pulando notícia: "${noticia.titulo}"`);
+        console.log(\n⏭ Pulando notícia: "${noticia.titulo}");
         continue;
       }
 
-      console.log(`\n📰 Título: ${noticia.titulo}`);
-      console.log(`🔗 Link: ${noticia.link}`);
+      console.log(\n📰 Título: ${noticia.titulo});
+      console.log(🔗 Link: ${noticia.link});
 
       const resultado = await pegarConteudoNoticia(noticia.link, noticia.titulo, browser);
       const conteudoFinal = resultado.texto.length > 0 ? resultado.texto : 'Conteúdo não disponível';
@@ -36,7 +36,7 @@ async function processarEstadao(browser) {
         conteudo: conteudoFinal
       });
 
-      console.log(`📝 Conteúdo do corpo:\n${resultado.texto}\n`);
+      console.log(📝 Conteúdo do corpo:\n${resultado.texto}\n);
     }
 
     const dadosParaPlanilha = noticiasComConteudo.map(n => [
@@ -48,7 +48,7 @@ async function processarEstadao(browser) {
 
     if (dadosParaPlanilha.length > 0) {
       await adicionarNoticias(dadosParaPlanilha, 'Estadão');
-      console.log(`✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Estadão".`);
+      console.log(✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Estadão".);
     }
   } catch (error) {
     console.error('Erro no fluxo do Estadão:', error.message);
@@ -60,11 +60,20 @@ async function processarTheNews(browser) {
   console.log('\n🔍 Coletando notícias do TheNews (somente de hoje)');
   try {
     const noticiasTheNews = await coletarNoticiasTheNews('https://thenewscc.beehiiv.com/', browser);
-    console.log(`🟢 TheNews (notícias coletadas):`, noticiasTheNews.length);
+    console.log(🟢 TheNews (notícias coletadas):, noticiasTheNews.length);
 
-    if (noticiasTheNews.length > 0) {
-      await adicionarNoticias(noticiasTheNews, 'TheNews');
-      console.log(`✅ ${noticiasTheNews.length} notícia(s) adicionada(s) à aba "TheNews".`);
+    // TheNews já vem com o conteúdo, então o formato é diferente
+    const dadosParaPlanilha = noticiasTheNews.map(n => [
+        new Date().toLocaleDateString('pt-BR'),
+        n.conteudo,
+        n.titulo,
+        n.link
+    ]);
+
+
+    if (dadosParaPlanilha.length > 0) {
+      await adicionarNoticias(dadosParaPlanilha, 'TheNews');
+      console.log(✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "TheNews".);
     } else {
       console.log('Nenhuma notícia do TheNews para hoje.');
     }
@@ -88,17 +97,17 @@ async function processarValor(browser) {
 
     for (const noticia of noticiasValor) {
       if (linksAdicionados.has(noticia.link)) {
-        console.log(`⏭️ Pulando notícia duplicada: "${noticia.titulo}"`);
+        console.log(⏭ Pulando notícia duplicada: "${noticia.titulo}");
         continue;
       }
       linksAdicionados.add(noticia.link);
 
-      console.log(`\n📰 Título: ${noticia.titulo}`);
-      console.log(`🔗 Link: ${noticia.link}`);
+      console.log(\n📰 Título: ${noticia.titulo});
+      console.log(🔗 Link: ${noticia.link});
 
       const resultado = await pegarConteudoNoticiaValor(noticia.link, noticia.titulo, browser);
       if (!resultado.texto || resultado.texto.trim().length === 0) {
-        console.log('⏭️ Conteúdo não disponível, pulando notícia.');
+        console.log('⏭ Conteúdo não disponível, pulando notícia.');
         continue;
       }
 
@@ -108,7 +117,7 @@ async function processarValor(browser) {
         conteudo: resultado.texto
       });
 
-      console.log(`📝 Conteúdo do corpo:\n${resultado.texto}\n`);
+      console.log(📝 Conteúdo do corpo:\n${resultado.texto}\n);
     }
 
     const dadosParaPlanilha = noticiasComConteudo.map(n => [
@@ -120,7 +129,7 @@ async function processarValor(browser) {
 
     if (dadosParaPlanilha.length > 0) {
       await adicionarNoticias(dadosParaPlanilha, 'Globo');
-      console.log(`✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Globo".`);
+      console.log(✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Globo".);
     } else {
       console.log('Nenhuma notícia válida para adicionar.');
     }
@@ -131,16 +140,17 @@ async function processarValor(browser) {
 
 // --- Função principal ---
 async function main() {
+  console.log('🚀 Iniciando o robô de notícias...');
   const browser = await puppeteer.launch({
-  headless: true,
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--single-process'
-  ],
-  executablePath: process.env.CHROME_BIN || puppeteer.executablePath()
-});
+    headless: true,
+    // Removido o executablePath para deixar o buildpack encontrar o Chrome
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--single-process'
+    ]
+  });
   try {
     await processarEstadao(browser);
     console.log('\n--- Coleta do Estadão finalizada ---');
@@ -151,10 +161,10 @@ async function main() {
     await processarValor(browser);
     console.log('\n--- Coleta do Valor Econômico finalizada ---');
   } catch (error) {
-    console.error('Erro inesperado:', error.message);
+    console.error('Erro inesperado na função main:', error.message);
   } finally {
     await browser.close();
-    console.log('\n✅ Navegador fechado.');
+    console.log('\n✅ Navegador fechado. Processo finalizado.');
   }
 }
 
