@@ -131,14 +131,18 @@ async function processarValor(browser) {
 
 // --- Função principal ---
 async function main() {
+  console.log('🚀 Iniciando o robô de notícias...');
   const browser = await puppeteer.launch({
     headless: true,
-    // Removido o executablePath para deixar o buildpack encontrar o Chrome
+    // O buildpack do Heroku define a variável de ambiente GOOGLE_CHROME_BIN.
+    // Usamos ela para dizer ao Puppeteer onde encontrar o Chrome.
+    executablePath: process.env.GOOGLE_CHROME_BIN || null,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
-      '--single-process'
+      '--single-process',
+      '--no-zygote' // Flag adicional para compatibilidade em ambientes como o Heroku
     ]
   });
   try {
