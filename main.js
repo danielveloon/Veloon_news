@@ -132,12 +132,10 @@ async function processarValor(browser) {
 // --- Função principal ---
 async function main() {
   const browser = await puppeteer.launch({
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox'
-    ]
-  });
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  executablePath: process.env.CHROME_BIN
+});
   try {
     await processarEstadao(browser);
     console.log('\n--- Coleta do Estadão finalizada ---');
