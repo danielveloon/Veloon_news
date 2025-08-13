@@ -133,8 +133,13 @@ async function processarValor(browser) {
 async function main() {
   const browser = await puppeteer.launch({
   headless: true,
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  executablePath: process.env.CHROME_BIN
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--single-process'
+  ],
+  executablePath: process.env.CHROME_BIN || puppeteer.executablePath()
 });
   try {
     await processarEstadao(browser);
