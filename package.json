@@ -3,15 +3,14 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "postinstall": "puppeteer browsers install chrome"
+    "start": "node main.js"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
     "googleapis": "^155.0.1",
-    "puppeteer": "^24.16.1"
+    "puppeteer-core": "^24.16.1"
   },
   "engines": {
-    "node":"22.x"
-}
+    "node": "22.x"
+  }
 }

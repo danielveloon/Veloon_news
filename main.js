@@ -1,13 +1,14 @@
 // main.js unificado
 require('dotenv').config();
-const puppeteer = require('puppeteer');
+// 1. Mude para puppeteer-core
+const puppeteer = require('puppeteer-core'); 
 const {
   coletarNoticiasEstadao,
   pegarConteudoNoticia,
   coletarNoticiasTheNews,
   coletarNoticiasValor,
   pegarConteudoNoticiaValor
-} = require('./scraper'); // ajuste se necessário
+} = require('./scraper'); 
 const { adicionarNoticias } = require('./sheets');
 
 // --- Função para coletar e processar notícias do Estadão ---
@@ -131,17 +132,24 @@ async function processarValor(browser) {
 
 // --- Função principal ---
 async function main() {
-  console.log('🚀 Iniciando o robô de notícias...');
-  const browser = await puppeteer.launch({
+  console.log('🚀 Iniciando o robô de notícias...'); // Adicionei um log inicial
+  
+  // 2. Configure as opções de inicialização
+  const launchOptions = {
     headless: true,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--single-process',
-      '--no-zygote' // Flag adicional para compatibilidade em ambientes como o Heroku
-    ]
-  });
+    ],
+  };
+
+  // O Heroku buildpack define esta variável de ambiente com o caminho para o executável do Chrome
+  if (process.env.GOOGLE_CREDENTIALS_BASE64) {
+    launchOptions.executablePath = process.env.GOOGLE_CREDENTIALS_BASE64;
+  }
+  
+  const browser = await puppeteer.launch(launchOptions);
+  
   try {
     await processarEstadao(browser);
     console.log('\n--- Coleta do Estadão finalizada ---');
