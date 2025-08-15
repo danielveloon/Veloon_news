@@ -1,9 +1,6 @@
 // main.js
 require('dotenv').config();
 
-// ADICIONE ESTA LINHA PARA TESTAR
-console.log('A variável de ambiente foi lida? Status:', process.env.PUPPETEER_EXECUTABLE_PATH ? 'SIM, FOI LIDA' : 'NÃO, ESTÁ VAZIA');
-
 // 1. Mude para puppeteer-core
 const chromium = require('@sparticuz/chromium');
 // ... resto do seu código
