@@ -144,8 +144,8 @@ async function main() {
   };
 
   // O Heroku buildpack define esta variável de ambiente com o caminho para o executável do Chrome
-  if (process.env.GOOGLE_CHROME_BIN) {
-    launchOptions.executablePath = process.env.GOOGLE_CHROME_BIN;
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
   }
   
   const browser = await puppeteer.launch(launchOptions);
