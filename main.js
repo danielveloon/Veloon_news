@@ -1,20 +1,18 @@
-// main.js
 require('dotenv').config();
-
-// 1. Mude para puppeteer-core
 const chromium = require('@sparticuz/chromium');
-// ... resto do seu código
 const puppeteer = require('puppeteer-core');
+
 const {
   coletarNoticiasEstadao,
   pegarConteudoNoticia,
   coletarNoticiasTheNews,
   coletarNoticiasValor,
   pegarConteudoNoticiaValor
-} = require('./scraper'); 
+} = require('./scraper');
+
 const { adicionarNoticias } = require('./sheets');
 
-// --- Função para coletar e processar notícias do Estadão ---
+// --- Função para processar notícias do Estadão ---
 async function processarEstadao(browser) {
   console.log('🔍 Coletando notícias do Estadão (somente de hoje)');
   const noticiasComConteudo = [];
@@ -23,11 +21,6 @@ async function processarEstadao(browser) {
     const noticiasEstadao = await coletarNoticiasEstadao('https://www.estadao.com.br/ultimas/', browser);
 
     for (const noticia of noticiasEstadao) {
-      if (noticia.titulo.includes('Som a Pino') || noticia.titulo.includes('Start Eldorado')) {
-        console.log(`\n⏭️ Pulando notícia: "${noticia.titulo}"`);
-        continue;
-      }
-
       console.log(`\n📰 Título: ${noticia.titulo}`);
       console.log(`🔗 Link: ${noticia.link}`);
 
@@ -39,45 +32,31 @@ async function processarEstadao(browser) {
         link: noticia.link,
         conteudo: conteudoFinal
       });
-
-      console.log(`📝 Conteúdo do corpo:\n${resultado.texto}\n`);
     }
 
-    const dadosParaPlanilha = noticiasComConteudo.map(n => [
-      new Date().toLocaleDateString('pt-BR'),
-      n.conteudo,
-      n.titulo,
-      n.link
-    ]);
-
-    if (dadosParaPlanilha.length > 0) {
-      await adicionarNoticias(dadosParaPlanilha, 'Estadão');
-      console.log(`✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Estadão".`);
+    if (noticiasComConteudo.length > 0) {
+      // Verifique o nome da aba no Google Sheets!
+      await adicionarNoticias(noticiasComConteudo, 'Estadão');
     }
   } catch (error) {
-    console.error('Erro no fluxo do Estadão:', error.message);
+    console.error('Erro no fluxo do Estadão:', error);
   }
 }
 
-// --- Função para coletar e processar notícias do TheNews ---
+// --- Função para processar notícias do TheNews ---
 async function processarTheNews(browser) {
   console.log('\n🔍 Coletando notícias do TheNews (somente de hoje)');
   try {
     const noticiasTheNews = await coletarNoticiasTheNews('https://thenewscc.beehiiv.com/', browser);
-    console.log(`🟢 TheNews (notícias coletadas):`, noticiasTheNews.length);
-
     if (noticiasTheNews.length > 0) {
       await adicionarNoticias(noticiasTheNews, 'TheNews');
-      console.log(`✅ ${noticiasTheNews.length} notícia(s) adicionada(s) à aba "TheNews".`);
-    } else {
-      console.log('Nenhuma notícia do TheNews para hoje.');
     }
   } catch (error) {
-    console.error('Erro no fluxo do TheNews:', error.message);
+    console.error('Erro no fluxo do TheNews:', error);
   }
 }
 
-// --- Função para coletar e processar notícias do Valor Econômico ---
+// --- Função para processar notícias do Valor Econômico ---
 async function processarValor(browser) {
   console.log('\n🔍 Coletando notícias do Valor Econômico (somente de hoje)');
   const noticiasComConteudo = [];
@@ -86,57 +65,32 @@ async function processarValor(browser) {
   try {
     const noticiasValor = await coletarNoticiasValor('https://valor.globo.com/ultimas-noticias/', browser);
 
-    if (!Array.isArray(noticiasValor)) {
-      throw new Error('noticiasValor não é um array');
-    }
-
     for (const noticia of noticiasValor) {
-      if (linksAdicionados.has(noticia.link)) {
-        console.log(`⏭️ Pulando notícia duplicada: "${noticia.titulo}"`);
-        continue;
-      }
+      if (linksAdicionados.has(noticia.link)) continue;
       linksAdicionados.add(noticia.link);
 
-      console.log(`\n📰 Título: ${noticia.titulo}`);
-      console.log(`🔗 Link: ${noticia.link}`);
-
       const resultado = await pegarConteudoNoticiaValor(noticia.link, noticia.titulo, browser);
-      if (!resultado.texto || resultado.texto.trim().length === 0) {
-        console.log('⏭️ Conteúdo não disponível, pulando notícia.');
-        continue;
-      }
+      if (!resultado.texto || resultado.texto.trim().length === 0) continue;
 
       noticiasComConteudo.push({
         titulo: noticia.titulo,
         link: noticia.link,
         conteudo: resultado.texto
       });
-
-      console.log(`📝 Conteúdo do corpo:\n${resultado.texto}\n`);
     }
 
-    const dadosParaPlanilha = noticiasComConteudo.map(n => [
-      new Date().toLocaleDateString('pt-BR'),
-      n.conteudo,
-      n.titulo,
-      n.link
-    ]);
-
-    if (dadosParaPlanilha.length > 0) {
-      await adicionarNoticias(dadosParaPlanilha, 'Globo');
-      console.log(`✅ ${dadosParaPlanilha.length} notícia(s) adicionada(s) à aba "Globo".`);
-    } else {
-      console.log('Nenhuma notícia válida para adicionar.');
+    if (noticiasComConteudo.length > 0) {
+      await adicionarNoticias(noticiasComConteudo, 'Globo');
     }
   } catch (error) {
-    console.error('Erro no fluxo do Valor Econômico:', error.message);
+    console.error('Erro no fluxo do Valor Econômico:', error);
   }
 }
 
+// --- Função principal ---
 async function main() {
   console.log('🚀 Iniciando o robô de notícias...');
-  
-  let browser; // declarado fora para ser usado no finally
+  let browser;
 
   try {
     browser = await puppeteer.launch({
@@ -147,13 +101,8 @@ async function main() {
     });
 
     await processarEstadao(browser);
-    console.log('\n--- Coleta do Estadão finalizada ---');
-
     await processarTheNews(browser);
-    console.log('\n--- Coleta do TheNews finalizada ---');
-
     await processarValor(browser);
-    console.log('\n--- Coleta do Valor Econômico finalizada ---');
 
   } catch (error) {
     console.error('Erro inesperado:', error);

@@ -13,9 +13,7 @@ if (!fs.existsSync(CREDENTIALS_PATH)) {
     process.exit(1);
   }
 
-  // Transformar o JSON em string válida (se tiver \n no Heroku)
   const credJson = process.env.CREDENTIALS_PATH.replace(/\\n/g, '\n');
-
   fs.writeFileSync(CREDENTIALS_PATH, credJson);
   console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
 }
@@ -26,22 +24,21 @@ console.log(`[INFO] O script 'sheets.js' está na pasta: ${__dirname}`);
 console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${CREDENTIALS_PATH}`);
 
 if (fs.existsSync(CREDENTIALS_PATH)) {
-    console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
+  console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
 } else {
-    console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
+  console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
 }
 console.log('--- FIM DA VERIFICAÇÃO ---');
 
 // --- FUNÇÕES ---
 async function autenticar() {
   const auth = new google.auth.GoogleAuth({
-    keyFile: CREDENTIALS_PATH, // usar o arquivo temporário
+    keyFile: CREDENTIALS_PATH,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   return await auth.getClient();
 }
 
-console.log('JSON de credenciais:', fs.readFileSync(CREDENTIALS_PATH, 'utf-8').slice(0, 100) + '...');
 async function adicionarNoticias(noticias, sheetName) {
   try {
     const authClient = await autenticar();
@@ -56,8 +53,13 @@ async function adicionarNoticias(noticias, sheetName) {
           n.link || ''
         ]);
 
-    if (valores.length === 0) return;
-    
+    if (valores.length === 0) {
+      console.log('[INFO] Nenhuma notícia para enviar.');
+      return;
+    }
+
+    console.log('📤 Valores a enviar para o Google Sheets:', valores);
+
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${sheetName}!A:D`,
@@ -65,9 +67,10 @@ async function adicionarNoticias(noticias, sheetName) {
       insertDataOption: 'INSERT_ROWS',
       requestBody: { values: valores },
     });
+
     console.log(`✅ ${valores.length} notícia(s) adicionada(s) na aba "${sheetName}".`);
   } catch (error) {
-    console.error(`❌ Erro ao adicionar notícias na aba "${sheetName}":`, error.message);
+    console.error(`❌ Erro ao adicionar notícias na aba "${sheetName}":`, error);
     throw error;
   }
 }
