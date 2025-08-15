@@ -1,33 +1,38 @@
-// sheets.js - VERSÃO FINAL E ROBUSTA
+// sheets.js - VERSÃO FINAL PARA HEROKU COM VARIÁVEL DE AMBIENTE
 const { google } = require('googleapis');
-const path = require('path'); // Módulo nativo do Node.js para lidar com caminhos
-const fs = require('fs');   // Módulo nativo do Node.js para lidar com arquivos
+const path = require('path');
+const fs = require('fs');
 
 const SPREADSHEET_ID = '1-u-WSLEpz7_537FytU_gK3bm3sKm-8Rkw2Fn3MFvRJ4';
 
-// --- LÓGICA INTELIGENTE PARA ENCONTRAR O ARQUIVO ---
-// '__dirname' é uma variável especial que sempre contém o caminho da pasta onde este script (sheets.js) está.
-// 'path.join' junta o caminho da pasta com o nome do arquivo, criando o caminho completo e correto.
-const PUPPETEER_EXECUTABLE_PATH = path.join(__dirname, 'credentials.json');
+// --- CRIAÇÃO TEMPORÁRIA DO ARQUIVO DE CREDENCIAIS ---
+const CREDENTIALS_PATH = path.join(__dirname, 'credentials-temp.json');
 
+if (!fs.existsSync(CREDENTIALS_PATH)) {
+  if (!process.env.GOOGLE_CREDENTIALS) {
+    console.error('[ERRO FATAL] A variável de ambiente GOOGLE_CREDENTIALS não foi definida!');
+    process.exit(1);
+  }
+  fs.writeFileSync(CREDENTIALS_PATH, process.env.GOOGLE_CREDENTIALS);
+  console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
+}
 
-// --- Bloco de Verificação e Depuração ---
+// --- DEPURAÇÃO ---
 console.log('--- INICIANDO VERIFICAÇÃO DE CREDENCIAIS ---');
 console.log(`[INFO] O script 'sheets.js' está na pasta: ${__dirname}`);
-console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${PUPPETEER_EXECUTABLE_PATH}`);
+console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${CREDENTIALS_PATH}`);
 
-if (fs.existsSync(PUPPETEER_EXECUTABLE_PATH)) {
-    console.log('[SUCESSO] O arquivo credentials.json foi ENCONTRADO.');
+if (fs.existsSync(CREDENTIALS_PATH)) {
+    console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
 } else {
-    console.error('[ERRO FATAL] O arquivo credentials.json NÃO FOI ENCONTRADO na mesma pasta que o sheets.js.');
+    console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
 }
 console.log('--- FIM DA VERIFICAÇÃO ---');
-// --- Fim do Bloco de Verificação ---
 
-
+// --- FUNÇÕES ---
 async function autenticar() {
   const auth = new google.auth.GoogleAuth({
-    keyFile: PUPPETEER_EXECUTABLE_PATH, // Usando o caminho completo e correto
+    keyFile: CREDENTIALS_PATH,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   return await auth.getClient();
@@ -47,9 +52,7 @@ async function adicionarNoticias(noticias, sheetName) {
           n.link || ''
         ]);
 
-    if (valores.length === 0) {
-      return;
-    }
+    if (valores.length === 0) return;
     
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
