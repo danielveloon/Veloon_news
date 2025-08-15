@@ -6,17 +6,20 @@ const fs = require('fs');
 const SPREADSHEET_ID = '1-u-WSLEpz7_537FytU_gK3bm3sKm-8Rkw2Fn3MFvRJ4';
 
 // --- CRIAÇÃO TEMPORÁRIA DO ARQUIVO DE CREDENCIAIS ---
-const PUPPETEER_EXECUTABLE_PATH = path.join(__dirname, 'credentials-temp.json');
+const CREDENTIALS_PATH = path.join(__dirname, 'credentials-temp.json');
 
-if (!fs.existsSync(PUPPETEER_EXECUTABLE_PATH)) {
-  if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
+if (!fs.existsSync(CREDENTIALS_PATH)) {
+  if (!process.env.GOOGLE_CREDENTIALS) {
     console.error('[ERRO FATAL] A variável de ambiente GOOGLE_CREDENTIALS não foi definida!');
     process.exit(1);
   }
-  fs.writeFileSync(PUPPETEER_EXECUTABLE_PATH, process.env.PUPPETEER_EXECUTABLE_PATH);
+
+  // Transformar o JSON em string válida (se tiver \n no Heroku)
+  const credJson = process.env.GOOGLE_CREDENTIALS.replace(/\\n/g, '\n');
+
+  fs.writeFileSync(CREDENTIALS_PATH, credJson);
   console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
 }
-
 // --- DEPURAÇÃO ---
 console.log('--- INICIANDO VERIFICAÇÃO DE CREDENCIAIS ---');
 console.log(`[INFO] O script 'sheets.js' está na pasta: ${__dirname}`);
@@ -32,7 +35,7 @@ console.log('--- FIM DA VERIFICAÇÃO ---');
 // --- FUNÇÕES ---
 async function autenticar() {
   const auth = new google.auth.GoogleAuth({
-    keyFile: PUPPETEER_EXECUTABLE_PATH,
+    keyFile: CREDENTIALS_PATH, // usar o arquivo temporário
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   return await auth.getClient();
