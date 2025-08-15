@@ -131,44 +131,19 @@ async function processarValor(browser) {
   }
 }
 
-// --- Função principal ---
 async function main() {
-  console.log('🚀 Iniciando o robô de notícias...'); // Adicionei um log inicial
+  console.log('🚀 Iniciando o robô de notícias...');
   
-  // 2. Configure as opções de inicialização
-const launchOptions = {
-  headless: true,
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-  ],
-  executablePath:
-    process.env.PUPPETEER_EXECUTABLE_PATH ||
-    '/usr/bin/google-chrome' // fallback para o buildpack novo
-};
+  let browser; // declarado fora para ser usado no finally
 
-  // O Heroku buildpack define esta variável de ambiente com o caminho para o executável do Chrome
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-  }
-  
-
-(async () => {
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(),
-    headless: chromium.headless,
-  });
-
-  const page = await browser.newPage();
-  await page.goto('https://example.com');
-  console.log(await page.title());
-
-  await browser.close();
-})();
-  
   try {
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+
     await processarEstadao(browser);
     console.log('\n--- Coleta do Estadão finalizada ---');
 
@@ -177,13 +152,15 @@ const launchOptions = {
 
     await processarValor(browser);
     console.log('\n--- Coleta do Valor Econômico finalizada ---');
+
   } catch (error) {
-    console.error('Erro inesperado:', error.message);
+    console.error('Erro inesperado:', error);
   } finally {
-    await browser.close();
-    console.log('\n✅ Navegador fechado.');
+    if (browser) {
+      await browser.close();
+      console.log('\n✅ Navegador fechado.');
+    }
   }
 }
 
-// Executa a função principal
 main();
