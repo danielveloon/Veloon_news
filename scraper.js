@@ -99,15 +99,17 @@ async function coletarNoticiasEstadao(url, browser) {
     if (!browser) throw new Error('Parâmetro browser não foi informado!');
 
     const page = await browser.newPage();
-    const hojeStr = new Date().toLocaleDateString('pt-BR');
 
     try {
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
         await page.waitForSelector('.container-initial-collection', { timeout: 20000 });
 
+        const agora = new Date();
+        const seisHorasAtras = new Date(agora.getTime() - 6 * 60 * 60 * 1000); // 6 horas atrás
+
         const noticias = await page.$$eval(
             '.container-initial-collection .noticias-mais-recenter--item',
-            (items, hojeStr) => {
+            (items, seisHorasAtrasStr) => {
                 return items.map(item => {
                     const linkEl = item.querySelector('a[href]');
                     const tituloEl = item.querySelector('h3.headline');
@@ -115,8 +117,15 @@ async function coletarNoticiasEstadao(url, browser) {
 
                     if (!linkEl || !tituloEl || !dataEl) return null;
 
-                    const dataTexto = dataEl.textContent.trim().split(',')[0];
-                    if (dataTexto !== hojeStr) return null;
+                    // Extrai data e hora
+                    const dataHoraTexto = dataEl.textContent.trim(); // exemplo: "15/08/2025 14:30"
+                    const [dataStr, horaStr] = dataHoraTexto.split(' '); 
+                    const [dia, mes, ano] = dataStr.split('/').map(Number);
+                    const [hora, minuto] = horaStr.split(':').map(Number);
+                    const dataNoticia = new Date(ano, mes - 1, dia, hora, minuto);
+
+                    // Filtra só as notícias das últimas 6 horas
+                    if (dataNoticia < new Date(seisHorasAtrasStr)) return null;
 
                     return {
                         titulo: tituloEl.innerText.trim(),
@@ -124,7 +133,7 @@ async function coletarNoticiasEstadao(url, browser) {
                     };
                 }).filter(Boolean);
             },
-            hojeStr
+            seisHorasAtras.toISOString()
         );
 
         await page.close();
@@ -135,6 +144,7 @@ async function coletarNoticiasEstadao(url, browser) {
         return [];
     }
 }
+
 
 async function pegarConteudoNoticia(url, titulo, browser) {
     if (!browser) throw new Error('Parâmetro browser não foi informado!');
