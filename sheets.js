@@ -8,13 +8,13 @@ const SPREADSHEET_ID = '1-u-WSLEpz7_537FytU_gK3bm3sKm-8Rkw2Fn3MFvRJ4';
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials-temp.json');
 
 if (!fs.existsSync(CREDENTIALS_PATH)) {
-  if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
-    console.error('[ERRO FATAL] A variável de ambiente PUPPETEER_EXECUTABLE_PATH não foi definida!');
+  if (!process.env.CREDENTIALS_PATH) {
+    console.error('[ERRO FATAL] A variável de ambiente CREDENTIALS_PATH não foi definida!');
     process.exit(1);
   }
 
   // Transformar o JSON em string válida (se tiver \n no Heroku)
-  const credJson = process.env.PUPPETEER_EXECUTABLE_PATH.replace(/\\n/g, '\n');
+  const credJson = process.env.CREDENTIALS_PATH.replace(/\\n/g, '\n');
 
   fs.writeFileSync(CREDENTIALS_PATH, credJson);
   console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
