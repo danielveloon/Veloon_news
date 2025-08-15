@@ -6,6 +6,7 @@
     "start": "node main.js"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^138.0.2",
     "dotenv": "^17.2.1",
     "googleapis": "^155.0.1",
     "puppeteer-core": "^24.16.1"
