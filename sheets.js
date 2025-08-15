@@ -1,4 +1,3 @@
-// sheets.js - VERSÃO FINAL PARA HEROKU COM VARIÁVEL DE AMBIENTE
 const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
@@ -20,17 +19,13 @@ if (!fs.existsSync(CREDENTIALS_PATH)) {
   fs.writeFileSync(CREDENTIALS_PATH, credJson);
   console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
 }
-// --- DEPURAÇÃO ---
-if (fs.existsSync(CREDENTIALS_PATH)) {
-    console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
-} else {
-    console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
-}
 
+// --- DEPURAÇÃO ---
+console.log('--- INICIANDO VERIFICAÇÃO DE CREDENCIAIS ---');
+console.log(`[INFO] O script 'sheets.js' está na pasta: ${__dirname}`);
 console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${CREDENTIALS_PATH}`);
 
-
-if (fs.existsSync(PUPPETEER_EXECUTABLE_PATH)) {
+if (fs.existsSync(CREDENTIALS_PATH)) {
     console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
 } else {
     console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
