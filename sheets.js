@@ -21,9 +21,14 @@ if (!fs.existsSync(CREDENTIALS_PATH)) {
   console.log('[INFO] Arquivo de credenciais temporário criado com sucesso.');
 }
 // --- DEPURAÇÃO ---
-console.log('--- INICIANDO VERIFICAÇÃO DE CREDENCIAIS ---');
-console.log(`[INFO] O script 'sheets.js' está na pasta: ${__dirname}`);
-console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${PUPPETEER_EXECUTABLE_PATH}`);
+if (fs.existsSync(CREDENTIALS_PATH)) {
+    console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
+} else {
+    console.error('[ERRO FATAL] O arquivo de credenciais TEMPORÁRIO NÃO FOI ENCONTRADO!');
+}
+
+console.log(`[INFO] Procurando pelo arquivo de credenciais em: ${CREDENTIALS_PATH}`);
+
 
 if (fs.existsSync(PUPPETEER_EXECUTABLE_PATH)) {
     console.log('[SUCESSO] O arquivo de credenciais TEMPORÁRIO foi ENCONTRADO.');
