@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
 const SPREADSHEET_ID = '1-u-WSLEpz7_537FytU_gK3bm3sKm-8Rkw2Fn3MFvRJ4';
-const CREDENTIALS_PATH = process.env.GOOGLE_CREDENTIALS_BASE64 || 'credentials.json';
+const CREDENTIALS_PATH = process.env.GOOGLE_CHROME_BIN || 'credentials.json';
 
 async function autenticar() {
   const auth = new google.auth.GoogleAuth({
