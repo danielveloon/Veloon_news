@@ -1,5 +1,13 @@
 // main.js unificado
 require('dotenv').config();
+// main.js
+require('dotenv').config();
+
+// ADICIONE ESTA LINHA PARA TESTAR
+console.log('A variável de ambiente foi lida? Status:', process.env.GOOGLE_CREDENTIALS_JSON ? 'SIM, FOI LIDA' : 'NÃO, ESTÁ VAZIA');
+
+// 1. Mude para puppeteer-core
+const chromium = require('@sparticuz/chromium');
 // 1. Mude para puppeteer-core
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
