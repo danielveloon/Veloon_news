@@ -41,6 +41,7 @@ async function autenticar() {
   return await auth.getClient();
 }
 
+console.log('JSON de credenciais:', fs.readFileSync(CREDENTIALS_PATH, 'utf-8').slice(0, 100) + '...');
 async function adicionarNoticias(noticias, sheetName) {
   try {
     const authClient = await autenticar();
