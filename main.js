@@ -1,7 +1,8 @@
 // main.js unificado
 require('dotenv').config();
 // 1. Mude para puppeteer-core
-const puppeteer = require('puppeteer-core'); 
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-core');
 const {
   coletarNoticiasEstadao,
   pegarConteudoNoticia,
@@ -135,20 +136,37 @@ async function main() {
   console.log('🚀 Iniciando o robô de notícias...'); // Adicionei um log inicial
   
   // 2. Configure as opções de inicialização
-  const launchOptions = {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-    ],
-  };
+const launchOptions = {
+  headless: true,
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+  ],
+  executablePath:
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    '/usr/bin/google-chrome' // fallback para o buildpack novo
+};
 
   // O Heroku buildpack define esta variável de ambiente com o caminho para o executável do Chrome
   if (process.env.PUPPETEER_EXECUTABLE_PATH) {
     launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
   }
   
-  const browser = await puppeteer.launch(launchOptions);
+
+(async () => {
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+  });
+
+  const page = await browser.newPage();
+  await page.goto('https://example.com');
+  console.log(await page.title());
+
+  await browser.close();
+})();
   
   try {
     await processarEstadao(browser);
